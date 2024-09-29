@@ -1,16 +1,11 @@
 #include "Rectangle.hpp"
 
-inline bool operator==(const rectangle& lhs, const rectangle& rhs)
-{
-  return lhs.x == rhs.x && lhs.y == rhs.y && lhs.h == rhs.h && lhs.w == rhs.w;
-}
-
 auto intersectRectangle(const rectangle& a,
-                        const rectangle& b) -> std::optional<rectangle>
+                        const rectangle& b) -> std::optional<intersect_rectangle>
 {
   // One over the other
   if (a == b) {
-    return a;
+    return intersect_rectangle{rectangle{a.h, a.w, a.x, a.y}, {a.idx, b.idx}};
   }
   // TODO: Intersect when not one over the other
   return std::nullopt;
@@ -19,7 +14,7 @@ auto intersectRectangle(const rectangle& a,
 auto intersectRectangles(const std::vector<rectangle>& rectangles)
     -> std::vector<intersect_rectangle>
 {
-  std::vector<intersect_rectangle> intersectRect;
+  std::vector<intersect_rectangle> intersectRects;
   const uint n_rectangles = rectangles.size();
   const uint n_rectagles_except_last = n_rectangles - 1;
   // TODO: Intersect more than 2
@@ -28,9 +23,10 @@ auto intersectRectangles(const std::vector<rectangle>& rectangles)
       const auto intersectionRect =
           intersectRectangle(rectangles.at(i), rectangles.at(j));
       if (intersectionRect) {
+        intersectRects.emplace_back(intersectionRect.value());
         (*intersectionRect).print();
       }
     }
   }
-  return intersectRect;
+  return intersectRects;
 }

@@ -15,6 +15,14 @@ struct rectangle
       , y {_y}
   {
   }
+    rectangle(uint _h, uint _w, uint _x, uint _y)
+      : idx {0}
+      , h {_h}
+      , w {_w}
+      , x {_x}
+      , y {_y}
+  {
+  }
   void print() const
   {
     std::cout << "\t" << idx << ": Rectangle at (" << x << "," << y
@@ -26,6 +34,11 @@ struct rectangle
   const uint x;
   const uint y;
 };
+
+inline bool operator==(const rectangle& lhs, const rectangle& rhs)
+{
+  return lhs.x == rhs.x && lhs.y == rhs.y && lhs.h == rhs.h && lhs.w == rhs.w;
+}
 
 struct intersect_rectangle
 {
