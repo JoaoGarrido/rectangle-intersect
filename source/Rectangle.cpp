@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "Rectangle.hpp"
 
 namespace details
@@ -6,8 +8,6 @@ namespace details
 auto intersectLineInTheSameAxis(const line a,
                                 const line b) -> std::optional<line>
 {
-  std::cout << "a -> " << a.first << " | " << a.second << std::endl;
-  std::cout << "b -> " << b.first << " | " << b.second << std::endl;
   // No intersection
   if (b.first >= a.second || a.first >= b.second) {
     return std::nullopt;
@@ -54,22 +54,96 @@ auto toRect(const std::optional<details::line> x,
   return rectangle {0, h, w, x.value().first, y.value().first};
 }
 
+auto createFamilyRectanglesList(const rectangle& a,
+                                const rectangle& b) -> std::set<uint>
+{
+  std::set<uint> intersectionIds;
+  intersectionIds.emplace(a.idx);
+  intersectionIds.emplace(b.idx);
+  return intersectionIds;
+}
+
 auto intersectRectangle(const rectangle& a, const rectangle& b)
     -> std::optional<intersect_rectangle>
 {
+  auto familyRectIdList = createFamilyRectanglesList(a, b);
   // One over the other
   if (a == b) {
-    return intersect_rectangle {rectangle {a.h, a.w, a.x, a.y}, {a.idx, b.idx}};
+    return intersect_rectangle {rectangle {a.h, a.w, a.x, a.y},
+                                familyRectIdList};
   }
   const auto xIntersect =
       details::intersectLineInTheSameAxis({a.x, a.x + a.w}, {b.x, b.x + b.w});
   const auto yIntersect =
       details::intersectLineInTheSameAxis({a.y, a.y + a.h}, {b.y, b.y + b.h});
   const auto intersectionRect = toRect(xIntersect, yIntersect);
-  if(!intersectionRect){
+  if (!intersectionRect) {
     return std::nullopt;
   }
-  return intersect_rectangle {intersectionRect.value(), {a.idx, b.idx}};
+  return intersect_rectangle {intersectionRect.value(), familyRectIdList};
+}
+
+auto createFamilyRectanglesList(const intersect_rectangle& a,
+                                const intersect_rectangle& b) -> std::set<uint>
+{
+  std::set<uint> intersectionIds;
+  std::merge(a.intersectionRectIds.cbegin(),
+             a.intersectionRectIds.cend(),
+             b.intersectionRectIds.cbegin(),
+             b.intersectionRectIds.cend(),
+             std::inserter(intersectionIds, intersectionIds.begin()));
+  return intersectionIds;
+}
+
+auto intersectRectangle(const intersect_rectangle& a,
+                        const intersect_rectangle& b)
+    -> std::optional<intersect_rectangle>
+{
+  auto familyRectIdList = createFamilyRectanglesList(a, b);
+  if (a == b) {
+    return std::nullopt;
+  } else if (a.intersectRect == b.intersectRect) {
+    return intersect_rectangle {rectangle {a.intersectRect.h,
+                                           a.intersectRect.w,
+                                           a.intersectRect.x,
+                                           a.intersectRect.y},
+                                familyRectIdList};
+  }
+  const auto& rectA = a.intersectRect;
+  const auto& rectB = b.intersectRect;
+  const auto xIntersect = details::intersectLineInTheSameAxis(
+      {rectA.x, rectA.x + rectA.w}, {rectB.x, rectB.x + rectB.w});
+  const auto yIntersect = details::intersectLineInTheSameAxis(
+      {rectA.y, rectA.y + rectA.h}, {rectB.y, rectB.y + rectB.h});
+  const auto intersectionRect = toRect(xIntersect, yIntersect);
+  if (!intersectionRect) {
+    return std::nullopt;
+  }
+  return intersect_rectangle {intersectionRect.value(), familyRectIdList};
+}
+
+auto addInternalIntersection(std::vector<intersect_rectangle>& rectangles)
+    -> bool
+{
+  bool addedMoreIntersection = false;
+  const uint n_rectangles = rectangles.size();
+  const uint n_rectagles_except_last = n_rectangles - 1;
+  for (uint i = 0; i < n_rectagles_except_last; i++) {
+    for (uint j = i + 1; j < n_rectangles; j++) {
+      const auto intersectionRect =
+          intersectRectangle(rectangles.at(i), rectangles.at(j));
+      if (intersectionRect
+          && std::find(
+                 rectangles.begin(), rectangles.end(), intersectionRect.value())
+              == rectangles.end())
+      {
+        rectangles.emplace_back(intersectionRect.value());
+        (*intersectionRect).print();
+        addedMoreIntersection = true;
+      }
+    }
+  }
+  return addedMoreIntersection;
 }
 
 auto intersectRectangles(const std::vector<rectangle>& rectangles)
@@ -78,7 +152,6 @@ auto intersectRectangles(const std::vector<rectangle>& rectangles)
   std::vector<intersect_rectangle> intersectRects;
   const uint n_rectangles = rectangles.size();
   const uint n_rectagles_except_last = n_rectangles - 1;
-  // TODO: Intersect more than 2
   for (uint i = 0; i < n_rectagles_except_last; i++) {
     for (uint j = i + 1; j < n_rectangles; j++) {
       const auto intersectionRect =
@@ -87,6 +160,10 @@ auto intersectRectangles(const std::vector<rectangle>& rectangles)
         intersectRects.emplace_back(intersectionRect.value());
         (*intersectionRect).print();
       }
+    }
+  }
+  if (!intersectRects.empty()) {
+    while (addInternalIntersection(intersectRects)) {
     }
   }
   return intersectRects;

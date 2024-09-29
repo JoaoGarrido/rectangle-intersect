@@ -53,7 +53,6 @@ auto main(int argc, const char** argv) -> int
   }
   std::cout << std::endl << "Intersections" << std::endl;
 
-  // intersectRectangles(rectangles);
-
+  intersectRectangles(rectangles);
   return 0;
 }

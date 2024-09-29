@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,25 +43,36 @@ inline bool operator==(const rectangle& lhs, const rectangle& rhs)
 
 struct intersect_rectangle
 {
-  intersect_rectangle(rectangle rect, std::vector<uint> ids)
+  intersect_rectangle(rectangle rect, std::set<uint> ids)
       : intersectRect {rect}
       , intersectionRectIds {std::move(ids)}
   {
   }
   const rectangle intersectRect;
-  const std::vector<uint> intersectionRectIds;
+  const std::set<uint> intersectionRectIds;
   void print() const
   {
-    std::cout << "\t" << "Between rectangle " << intersectionRectIds.at(0);
-    for (uint i = 1; i < intersectionRectIds.size() - 1; i++) {
-      std::cout << ", " << intersectionRectIds.at(i);
+    std::cout << "\t" << "Between rectangle "
+              << *(intersectionRectIds.cbegin());
+    for (auto it = std::next(intersectionRectIds.begin(), 1);
+         it != std::prev(intersectionRectIds.end(), 1);
+         it++)
+    {
+      std::cout << ", " << *it;
     }
-    std::cout << "and " << intersectionRectIds.back() << "at ";
+    std::cout << " and " << *(intersectionRectIds.rbegin()) << " at ";
     std::cout << "(" << intersectRect.x << "," << intersectRect.y
               << "), w=" << intersectRect.w << ", h=" << intersectRect.h
               << ".\n";
   }
 };
+
+inline bool operator==(const intersect_rectangle& lhs,
+                       const intersect_rectangle& rhs)
+{
+  return lhs.intersectRect == rhs.intersectRect
+      && lhs.intersectionRectIds == rhs.intersectionRectIds;
+}
 
 auto intersectRectangles(const std::vector<rectangle>& rectangles)
     -> std::vector<intersect_rectangle>;
@@ -69,7 +81,7 @@ namespace details
 {
 
 // Line in the same axis
-// {Starting value, End value}  
+// {Starting value, End value}
 using line = std::pair<uint, uint>;
 
 auto intersectLineInTheSameAxis(const line a,
