@@ -43,6 +43,17 @@ auto intersectLineInTheSameAxis(const line a,
 
 }  // namespace details
 
+auto toRect(const std::optional<details::line> x,
+            const std::optional<details::line> y) -> std::optional<rectangle>
+{
+  if (!x || !y) {
+    return std::nullopt;
+  }
+  const auto w = x.value().second - x.value().first;
+  const auto h = y.value().second - y.value().first;
+  return rectangle {0, h, w, x.value().first, y.value().first};
+}
+
 auto intersectRectangle(const rectangle& a, const rectangle& b)
     -> std::optional<intersect_rectangle>
 {
@@ -50,8 +61,15 @@ auto intersectRectangle(const rectangle& a, const rectangle& b)
   if (a == b) {
     return intersect_rectangle {rectangle {a.h, a.w, a.x, a.y}, {a.idx, b.idx}};
   }
-  // TODO: Intersect when not one over the other
-  return std::nullopt;
+  const auto xIntersect =
+      details::intersectLineInTheSameAxis({a.x, a.x + a.w}, {b.x, b.x + b.w});
+  const auto yIntersect =
+      details::intersectLineInTheSameAxis({a.y, a.y + a.h}, {b.y, b.y + b.h});
+  const auto intersectionRect = toRect(xIntersect, yIntersect);
+  if(!intersectionRect){
+    return std::nullopt;
+  }
+  return intersect_rectangle {intersectionRect.value(), {a.idx, b.idx}};
 }
 
 auto intersectRectangles(const std::vector<rectangle>& rectangles)

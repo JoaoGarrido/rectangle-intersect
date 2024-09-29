@@ -42,8 +42,8 @@ inline bool operator==(const rectangle& lhs, const rectangle& rhs)
 
 struct intersect_rectangle
 {
-  intersect_rectangle(rectangle&& rect, std::vector<uint> ids)
-      : intersectRect {std::move(rect)}
+  intersect_rectangle(rectangle rect, std::vector<uint> ids)
+      : intersectRect {rect}
       , intersectionRectIds {std::move(ids)}
   {
   }

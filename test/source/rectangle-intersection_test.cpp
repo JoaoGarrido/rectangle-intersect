@@ -51,6 +51,30 @@ TEST(IntersectRectangleTest, IntersectRectangleHasIdZero)
   ASSERT_EQ(intersectionRects.front().intersectRect.idx, 0);
 }
 
+TEST(IntersectRectangleTest, IntersectRectanglesThatDoNotIntersect)
+{
+  const auto rectA = rectangle(1, 1, 1, 0, 0);
+  const auto rectB = rectangle(2, 1, 1, 2, 2);
+  ASSERT_EQ(intersectRectangles({rectA, rectB}).size(), 0);
+}
+
+TEST(IntersectRectangleTest, IntersectRectanglePartOnePartOther)
+{
+  const auto rectA = rectangle(1, 1, 2, 2, 1); // 2->4 in x and 1->2 in y
+  const auto rectB = rectangle(2, 4, 2, 3, 0); // 3->5 in x and 0->4 in y
+  const auto intersectionRects = intersectRectangles({rectA, rectB});
+  ASSERT_EQ(intersectionRects.size(), 1);
+  EXPECT_EQ(rectangle(1, 1, 3, 1), intersectionRects.front().intersectRect);
+}
+
+TEST(IntersectRectangleTest, IntersectRectangleContainedInTheOther)
+{
+  const auto rectA = rectangle(1, 4, 6, 0, 1); // 0->6 in x and 1->5 in y
+  const auto rectB = rectangle(2, 2, 2, 3, 2); // 3->5 in x and 2->4 in y
+  const auto intersectionRects = intersectRectangles({rectA, rectB});
+  ASSERT_EQ(intersectionRects.size(), 1);
+  EXPECT_EQ(rectB, intersectionRects.front().intersectRect);}
+
 TEST(IntersectLine, SameLine)
 {
   const auto lineA = line {1, 2};
