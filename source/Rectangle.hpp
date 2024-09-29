@@ -26,3 +26,28 @@ struct rectangle
   const uint x;
   const uint y;
 };
+
+struct intersect_rectangle
+{
+  intersect_rectangle(rectangle&& rect, std::vector<uint> ids)
+      : intersectRect {std::move(rect)}
+      , intersectionRectIds {std::move(ids)}
+  {
+  }
+  const rectangle intersectRect;
+  const std::vector<uint> intersectionRectIds;
+  void print() const
+  {
+    std::cout << "\t" << "Between rectangle " << intersectionRectIds.at(0);
+    for (uint i = 1; i < intersectionRectIds.size() - 1; i++) {
+      std::cout << ", " << intersectionRectIds.at(i);
+    }
+    std::cout << "and " << intersectionRectIds.back() << "at ";
+    std::cout << "(" << intersectRect.x << "," << intersectRect.y
+              << "), w=" << intersectRect.w << ", h=" << intersectRect.h
+              << ".\n";
+  }
+};
+
+auto intersectRectangles(const std::vector<rectangle>& rectangles)
+    -> std::vector<intersect_rectangle>;
