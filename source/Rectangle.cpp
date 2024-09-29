@@ -1,11 +1,54 @@
 #include "Rectangle.hpp"
 
-auto intersectRectangle(const rectangle& a,
-                        const rectangle& b) -> std::optional<intersect_rectangle>
+namespace details
+{
+
+auto intersectLineInTheSameAxis(const line a,
+                                const line b) -> std::optional<line>
+{
+  std::cout << "a -> " << a.first << " | " << a.second << std::endl;
+  std::cout << "b -> " << b.first << " | " << b.second << std::endl;
+  // No intersection
+  if (b.first >= a.second || a.first >= b.second) {
+    return std::nullopt;
+  }
+  // Same coordinate
+  else if (a == b)
+  {
+    return a;
+  }
+  // B contained in A
+  else if (b.first >= a.first && b.second <= a.second)
+  {
+    return b;
+  }
+  // A contained in B
+  else if (a.first >= b.first && a.second <= b.second)
+  {
+    return a;
+  }
+  // Intersection starts in a ends in b
+  else if (a.first >= b.first && a.second >= b.second)
+  {
+    return line {a.first, b.second};
+  }
+  // Intersection starts in b ends in a
+  else if (b.first >= a.first && b.second >= a.second)
+  {
+    return line {b.first, a.second};
+  }
+  std::cerr << "IMPOSSIBLE!" << std::endl;
+  return std::nullopt;
+}
+
+}  // namespace details
+
+auto intersectRectangle(const rectangle& a, const rectangle& b)
+    -> std::optional<intersect_rectangle>
 {
   // One over the other
   if (a == b) {
-    return intersect_rectangle{rectangle{a.h, a.w, a.x, a.y}, {a.idx, b.idx}};
+    return intersect_rectangle {rectangle {a.h, a.w, a.x, a.y}, {a.idx, b.idx}};
   }
   // TODO: Intersect when not one over the other
   return std::nullopt;

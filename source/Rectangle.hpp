@@ -15,7 +15,7 @@ struct rectangle
       , y {_y}
   {
   }
-    rectangle(uint _h, uint _w, uint _x, uint _y)
+  rectangle(uint _h, uint _w, uint _x, uint _y)
       : idx {0}
       , h {_h}
       , w {_w}
@@ -64,3 +64,15 @@ struct intersect_rectangle
 
 auto intersectRectangles(const std::vector<rectangle>& rectangles)
     -> std::vector<intersect_rectangle>;
+
+namespace details
+{
+
+// Line in the same axis
+// {Starting value, End value}  
+using line = std::pair<uint, uint>;
+
+auto intersectLineInTheSameAxis(const line a,
+                                const line b) -> std::optional<line>;
+
+}  // namespace details
