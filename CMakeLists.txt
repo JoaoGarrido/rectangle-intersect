@@ -17,7 +17,7 @@ include(cmake/variables.cmake)
 
 add_library(
     rectangle-intersection_lib OBJECT
-    source/Rectangle.cpp
+    source/Rectangle.hpp
 )
 
 target_include_directories(
